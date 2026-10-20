@@ -1,0 +1,15 @@
+{
+  "kind": "component-definition",
+  "id": "publisher",
+  "functionality": "Publish an approved package and emit a receipt.",
+  "inputs": {
+    "approvedPackage": {
+      "type": "object"
+    }
+  },
+  "outcomes": {
+    "receipt": {
+      "type": "object"
+    }
+  }
+}
