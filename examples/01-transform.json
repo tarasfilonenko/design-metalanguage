@@ -1,0 +1,21 @@
+{
+  "kind": "component-definition",
+  "id": "normalize-name",
+  "functionality": "Trim whitespace and normalize a person's display name.",
+  "configuration": {
+    "caseStyle": {
+      "type": "string",
+      "default": "title"
+    }
+  },
+  "inputs": {
+    "rawName": {
+      "type": "string"
+    }
+  },
+  "outcomes": {
+    "normalizedName": {
+      "type": "string"
+    }
+  }
+}
