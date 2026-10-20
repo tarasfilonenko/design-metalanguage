@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Design Metalanguage · Visualizer</title>
+<style>
+:root{font:15px/1.5 system-ui,-apple-system,sans-serif;color:#e5eaf4;background:#0b1220;color-scheme:dark}
+*{box-sizing:border-box}body{margin:0}header{padding:20px clamp(16px,4vw,44px);border-bottom:1px solid #293348}
+h1{font-size:22px;margin:0}header p{color:#aebbd1;margin:4px 0 0}
+main{padding:20px clamp(16px,4vw,44px);max-width:1400px;margin:auto}
+form{display:flex;gap:8px;flex-wrap:wrap}input{flex:1;min-width:240px;background:#172238;border:1px solid #3c4d68;color:inherit;padding:11px;border-radius:8px}
+button{background:#6387ec;color:#081226;border:0;border-radius:8px;padding:10px 18px;font-weight:700;cursor:pointer}
+#status{margin:14px 0;color:#b5c5e3;white-space:pre-wrap}#status.error{color:#ff9fa4}
+.layout{display:grid;grid-template-columns:minmax(0,2fr) minmax(280px,1fr);gap:16px}
+.panel{background:#111c30;border:1px solid #2e3d57;border-radius:12px;padding:16px;min-width:0}
+h2{font-size:16px;margin:0 0 12px}#diagram{overflow:auto;min-height:240px}
+.node{border:1px solid #536b9c;border-radius:10px;padding:12px;margin:12px 0;background:#192b49}
+.node .name{font-weight:700}.node .meta{color:#aebbd1;font-size:12px;overflow-wrap:anywhere}
+.children{border-left:2px solid #506da8;padding-left:18px;margin:12px 0 0 10px}
+.wires{font:12px/1.6 ui-monospace,monospace;background:#101b2e;border-radius:7px;padding:8px;margin-top:10px;overflow-wrap:anywhere}
+pre{white-space:pre-wrap;overflow-wrap:anywhere;font:12px/1.5 ui-monospace,monospace}
+small{color:#aebbd1}a{color:#a8c4ff}
+@media(max-width:800px){.layout{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header><h1>Design Metalanguage · Visualizer</h1><p>Browser-based component composition explorer · no backend or manifest</p></header>
+<main>
+<form id="loader"><input id="entry" aria-label="Entry point URL or path" placeholder="examples/02-composition/main.json" required><button type="submit">Visualize</button></form>
+<div id="status" role="status" aria-live="polite">Enter a main.json path to begin.</div>
+<div class="layout"><section class="panel"><h2>Component composition</h2><div id="diagram"></div></section>
+<section class="panel"><h2>Entry point</h2><pre id="details">No example loaded.</pre><h2>Resolved definitions</h2><div id="definitions"></div></section></div>
+<p><small>Definitions are loaded from the entry point's sibling <code>components/</code> folder, by ID. External URLs require CORS permission. Paths must stay within the example folder.</small></p>
+</main>
+<script type="module">
+const $ = id => document.getElementById(id);
+const params = new URLSearchParams(location.search);
+const defaultEntry = '../../examples/02-composition/main.json';
+$('entry').value = params.get('entry') || defaultEntry;
+const validId = /^[a-zA-Z0-9][a-zA-Z0-9_-]*$/;
+const validEndpoint = /^(?:(?:[a-zA-Z0-9_-]+)\.)?(?:inputs|outcomes)\.[a-zA-Z0-9_-]+$/;
+function el(tag, className, content) {
+  const node = document.createElement(tag);
+  if (className) node.className = className;
+  if (content !== undefined) node.textContent = String(content);
+  return node;
+}
+function fail(message) { throw new Error(message); }
+function entryURL(value) {
+  const url = new URL(value, location.href);
+  if (!/^https?:$/.test(url.protocol)) fail('Only HTTP(S) entry points are supported.');
+  if (!url.pathname.endsWith('/main.json')) fail('Entry point must end in /main.json.');
+  return url;
+}
+async function fetchJSON(url) {
+  const response = await fetch(url);
+  if (!response.ok) fail('HTTP ' + response.status + ' loading ' + url.href);
+  try { return await response.json(); }
+  catch { fail('Invalid JSON: ' + url.href); }
+}
+async function resolve(entry) {
+  const root = await fetchJSON(entry);
+  if (root?.kind !== 'component-instance' || !root.definition) fail('Entry must be a component-instance with a definition.');
+  const base = new URL('./components/', entry);
+  const cache = new Map();
+  async function definition(id) {
+    if (typeof id !== 'string' || !validId.test(id)) fail('Invalid definition ID: ' + id);
+    if (!cache.has(id)) {
+      const promise = (async () => {
+        const data = await fetchJSON(new URL(encodeURIComponent(id) + '.json', base));
+        if (data?.kind !== 'component-definition' || data.id !== id)
+          fail('Definition file must contain kind=component-definition and id=' + id);
+        return data;
+      })();
+      cache.set(id, promise);
+    }
+    return cache.get(id);
+  }
+  async function expand(instance, stack = []) {
+    if (!instance || instance.kind !== 'component-instance' || !instance.definition)
+      fail('Invalid component instance in ' + (stack.at(-1) || 'main.json'));
+    const id = instance.definition;
+    if (stack.includes(id)) fail('Recursive definition cycle: ' + [...stack, id].join(' → '));
+    const def = await definition(id);
+    const children = def.components || [];
+    if (!Array.isArray(children)) fail('components must be an array in ' + id);
+    const seen = new Set();
+    for (const child of children) {
+      if (!child.id || seen.has(child.id)) fail('Missing or duplicate child instance ID in ' + id);
+      seen.add(child.id);
+    }
+    const wires = def.wires || [];
+    if (!Array.isArray(wires)) fail('wires must be an array in ' + id);
+    for (const wire of wires) {
+      for (const end of ['from', 'to']) {
+        const endpoint = wire[end];
+        if (typeof endpoint !== 'string' || !validEndpoint.test(endpoint))
+          fail('Malformed wire ' + end + ' in ' + id + ': ' + endpoint);
+        const first = endpoint.split('.')[0];
+        if (first !== 'inputs' && first !== 'outcomes' && !seen.has(first))
+          fail('Unknown endpoint instance in ' + id + ': ' + endpoint);
+      }
+    }
+    const expanded = await Promise.all(children.map(child => expand(child, [...stack, id])));
+    return {instance, def, children: expanded, wires};
+  }
+  const tree = await expand(root);
+  return {root, tree, cache};
+}
+function renderNode(item) {
+  const outer = el('div', 'node');
+  outer.append(el('div', 'name', (item.instance.id || item.def.id) + ' : ' + item.def.id));
+  if (item.def.functionality) outer.append(el('div', 'meta', item.def.functionality));
+  if (item.children.length) {
+    const group = el('div', 'children');
+    for (const child of item.children) group.append(renderNode(child));
+    outer.append(group);
+  }
+  if (item.wires.length) {
+    const wires = el('div', 'wires');
+    wires.append(el('strong', '', 'Wiring'));
+    for (const wire of item.wires) wires.append(el('div', '', wire.from + ' → ' + wire.to));
+    outer.append(wires);
+  }
+  return outer;
+}
+async function load(value) {
+  $('status').className = '';
+  $('status').textContent = 'Loading…';
+  $('diagram').replaceChildren();
+  $('definitions').replaceChildren();
+  $('details').textContent = '';
+  try {
+    const url = entryURL(value);
+    const result = await resolve(url);
+    $('diagram').append(renderNode(result.tree));
+    $('details').textContent = JSON.stringify(result.root, null, 2);
+    for (const id of result.cache.keys()) $('definitions').append(el('div', 'meta', id + '.json'));
+    $('status').textContent = 'Loaded ' + result.cache.size + ' definition(s) from ' + url.href;
+    const next = new URL(location.href);
+    next.searchParams.set('entry', value);
+    history.replaceState(null, '', next);
+  } catch (error) {
+    $('status').className = 'error';
+    $('status').textContent = error.message || String(error);
+  }
+}
+$('loader').addEventListener('submit', event => { event.preventDefault(); load($('entry').value.trim()); });
+load($('entry').value);
+</script>
+</body></html>
