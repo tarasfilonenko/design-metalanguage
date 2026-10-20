@@ -1,0 +1,8 @@
+{
+  "kind": "component-instance",
+  "id": "welcome-example",
+  "definition": "welcome-flow",
+  "inputs": {
+    "name": "  ada lovelace  "
+  }
+}
