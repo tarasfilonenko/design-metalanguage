@@ -1,0 +1,39 @@
+{
+  "kind": "component-definition",
+  "id": "welcome-flow",
+  "functionality": "Normalize a name and produce a greeting.",
+  "inputs": {
+    "name": {
+      "type": "string"
+    }
+  },
+  "outcomes": {
+    "greeting": {
+      "type": "string"
+    }
+  },
+  "components": [
+    {
+      "id": "normalize",
+      "definition": "normalize-name"
+    },
+    {
+      "id": "greet",
+      "definition": "make-greeting"
+    }
+  ],
+  "wires": [
+    {
+      "from": "inputs.name",
+      "to": "normalize.inputs.rawName"
+    },
+    {
+      "from": "normalize.outcomes.normalizedName",
+      "to": "greet.inputs.name"
+    },
+    {
+      "from": "greet.outcomes.message",
+      "to": "outcomes.greeting"
+    }
+  ]
+}
