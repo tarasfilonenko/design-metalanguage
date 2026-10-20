@@ -1,0 +1,11 @@
+{
+  "kind": "component-instance",
+  "id": "normalize-example",
+  "definition": "normalize-name",
+  "configuration": {
+    "caseStyle": "title"
+  },
+  "inputs": {
+    "rawName": "  ada lovelace  "
+  }
+}
