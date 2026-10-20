@@ -1,0 +1,21 @@
+{
+  "kind": "component-definition",
+  "id": "normalize-name",
+  "functionality": "Trim surrounding whitespace and normalize display-name casing.",
+  "configuration": {
+    "caseStyle": {
+      "type": "string",
+      "default": "title"
+    }
+  },
+  "inputs": {
+    "rawName": {
+      "type": "string"
+    }
+  },
+  "outcomes": {
+    "normalizedName": {
+      "type": "string"
+    }
+  }
+}
