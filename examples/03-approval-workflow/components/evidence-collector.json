@@ -1,0 +1,15 @@
+{
+  "kind": "component-definition",
+  "id": "evidence-collector",
+  "functionality": "Gather evidence for a document.",
+  "inputs": {
+    "document": {
+      "type": "object"
+    }
+  },
+  "outcomes": {
+    "reviewPackage": {
+      "type": "object"
+    }
+  }
+}
