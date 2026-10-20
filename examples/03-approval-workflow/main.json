@@ -1,0 +1,8 @@
+{
+  "kind": "component-instance",
+  "id": "publishing-example",
+  "definition": "review-and-publish",
+  "inputs": {
+    "brief": "Write a short project announcement."
+  }
+}
