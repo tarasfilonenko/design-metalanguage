@@ -1,0 +1,9 @@
+{
+  "kind": "component-instance",
+  "id": "authentication-example",
+  "definition": "authentication",
+  "inputs": {
+    "username": "demo-user",
+    "password": "<provided-at-runtime>"
+  }
+}
