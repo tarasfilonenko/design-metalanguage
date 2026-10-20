@@ -1,0 +1,15 @@
+{
+  "kind": "component-definition",
+  "id": "content-generator",
+  "functionality": "Produce a draft from a brief.",
+  "inputs": {
+    "brief": {
+      "type": "string"
+    }
+  },
+  "outcomes": {
+    "document": {
+      "type": "object"
+    }
+  }
+}
