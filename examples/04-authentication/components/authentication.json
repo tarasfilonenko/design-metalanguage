@@ -1,0 +1,72 @@
+{
+  "kind": "component-definition",
+  "id": "authentication",
+  "functionality": "Authenticate credentials, issue a session only on success, and expose failures as typed outcomes. Example is conceptual, not executable authentication.",
+  "inputs": {
+    "username": {
+      "type": "string"
+    },
+    "password": {
+      "type": "string"
+    }
+  },
+  "outcomes": {
+    "authenticated": {
+      "type": "object"
+    },
+    "rejected": {
+      "type": "object"
+    },
+    "sessionError": {
+      "type": "object"
+    }
+  },
+  "components": [
+    {
+      "id": "validate",
+      "definition": "credential-validator"
+    },
+    {
+      "id": "verify",
+      "definition": "identity-verifier"
+    },
+    {
+      "id": "issue",
+      "definition": "session-issuer"
+    }
+  ],
+  "wires": [
+    {
+      "from": "inputs.username",
+      "to": "validate.inputs.username"
+    },
+    {
+      "from": "inputs.password",
+      "to": "validate.inputs.password"
+    },
+    {
+      "from": "validate.outcomes.validCredentials",
+      "to": "verify.inputs.credentials"
+    },
+    {
+      "from": "validate.outcomes.invalidCredentials",
+      "to": "outcomes.rejected"
+    },
+    {
+      "from": "verify.outcomes.verifiedIdentity",
+      "to": "issue.inputs.identity"
+    },
+    {
+      "from": "verify.outcomes.authenticationFailed",
+      "to": "outcomes.rejected"
+    },
+    {
+      "from": "issue.outcomes.session",
+      "to": "outcomes.authenticated"
+    },
+    {
+      "from": "issue.outcomes.issuanceFailed",
+      "to": "outcomes.sessionError"
+    }
+  ]
+}
