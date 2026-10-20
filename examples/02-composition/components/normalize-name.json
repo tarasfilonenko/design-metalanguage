@@ -1,0 +1,15 @@
+{
+  "kind": "component-definition",
+  "id": "normalize-name",
+  "functionality": "Trim whitespace and title-case a name.",
+  "inputs": {
+    "rawName": {
+      "type": "string"
+    }
+  },
+  "outcomes": {
+    "normalizedName": {
+      "type": "string"
+    }
+  }
+}
