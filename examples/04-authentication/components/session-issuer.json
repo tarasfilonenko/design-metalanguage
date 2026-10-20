@@ -1,0 +1,18 @@
+{
+  "kind": "component-definition",
+  "id": "session-issuer",
+  "functionality": "Issue a cryptographically secure, short-lived session for a verified identity; set secure cookie flags in a concrete implementation.",
+  "inputs": {
+    "identity": {
+      "type": "object"
+    }
+  },
+  "outcomes": {
+    "session": {
+      "type": "object"
+    },
+    "issuanceFailed": {
+      "type": "object"
+    }
+  }
+}
