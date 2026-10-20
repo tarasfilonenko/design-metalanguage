@@ -1,0 +1,18 @@
+{
+  "kind": "component-definition",
+  "id": "identity-verifier",
+  "functionality": "Look up the user and verify password against a securely stored password hash using a vetted password hashing library; use generic errors.",
+  "inputs": {
+    "credentials": {
+      "type": "object"
+    }
+  },
+  "outcomes": {
+    "verifiedIdentity": {
+      "type": "object"
+    },
+    "authenticationFailed": {
+      "type": "object"
+    }
+  }
+}
