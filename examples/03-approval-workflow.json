@@ -1,0 +1,63 @@
+{
+  "kind": "component-definition",
+  "id": "review-and-publish",
+  "functionality": "Draft content, gather evidence, require an approval decision, and publish only approved content.",
+  "inputs": {
+    "brief": {
+      "type": "string"
+    }
+  },
+  "outcomes": {
+    "published": {
+      "type": "object"
+    },
+    "rejected": {
+      "type": "object"
+    }
+  },
+  "components": [
+    {
+      "id": "draft",
+      "definition": "content-generator"
+    },
+    {
+      "id": "evidence",
+      "definition": "evidence-collector"
+    },
+    {
+      "id": "approval",
+      "definition": "approval-gate"
+    },
+    {
+      "id": "publish",
+      "definition": "publisher"
+    }
+  ],
+  "wires": [
+    {
+      "from": "inputs.brief",
+      "to": "draft.inputs.brief"
+    },
+    {
+      "from": "draft.outcomes.document",
+      "to": "evidence.inputs.document"
+    },
+    {
+      "from": "evidence.outcomes.reviewPackage",
+      "to": "approval.inputs.reviewPackage"
+    },
+    {
+      "from": "approval.outcomes.approved",
+      "to": "publish.inputs.approvedPackage"
+    },
+    {
+      "from": "publish.outcomes.receipt",
+      "to": "outcomes.published"
+    },
+    {
+      "from": "approval.outcomes.rejected",
+      "to": "outcomes.rejected"
+    }
+  ],
+  "note": "Conceptual illustration; referenced definitions and exact approval semantics remain unspecified."
+}
