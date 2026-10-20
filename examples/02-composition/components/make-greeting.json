@@ -1,0 +1,15 @@
+{
+  "kind": "component-definition",
+  "id": "make-greeting",
+  "functionality": "Create a friendly greeting for the supplied name.",
+  "inputs": {
+    "name": {
+      "type": "string"
+    }
+  },
+  "outcomes": {
+    "message": {
+      "type": "string"
+    }
+  }
+}
