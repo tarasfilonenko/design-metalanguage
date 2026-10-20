@@ -1,0 +1,18 @@
+{
+  "kind": "component-definition",
+  "id": "approval-gate",
+  "functionality": "Ask an authorized reviewer to approve or reject the package.",
+  "inputs": {
+    "reviewPackage": {
+      "type": "object"
+    }
+  },
+  "outcomes": {
+    "approved": {
+      "type": "object"
+    },
+    "rejected": {
+      "type": "object"
+    }
+  }
+}
