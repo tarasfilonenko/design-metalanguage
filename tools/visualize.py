@@ -59,9 +59,9 @@ def mermaid(root, definitions):
                 if prefix not in children:
                     raise ValueError(f"Unknown endpoint in {definition_id}: {value}")
                 return children[prefix]
-            if not re.fullmatch(r"[A-Za-z0-9_-]+\\.(inputs|outcomes)\\.[A-Za-z0-9_-]+|(?:inputs|outcomes)\\.[A-Za-z0-9_-]+", source):
+            if not re.fullmatch(r"[A-Za-z0-9_-]+\.(inputs|outcomes)\.[A-Za-z0-9_-]+|(?:inputs|outcomes)\.[A-Za-z0-9_-]+", source):
                 raise ValueError(f"Malformed wire source: {source}")
-            if not re.fullmatch(r"[A-Za-z0-9_-]+\\.(inputs|outcomes)\\.[A-Za-z0-9_-]+|(?:inputs|outcomes)\\.[A-Za-z0-9_-]+", target):
+            if not re.fullmatch(r"[A-Za-z0-9_-]+\.(inputs|outcomes)\.[A-Za-z0-9_-]+|(?:inputs|outcomes)\.[A-Za-z0-9_-]+", target):
                 raise ValueError(f"Malformed wire target: {target}")
             label = f"{source} → {target}".replace('"', "&quot;")
             lines.append(f'  {endpoint(source)} -->|"{label}"| {endpoint(target)}')
@@ -80,7 +80,7 @@ def main():
         diagram = mermaid(*load_example(args.example))
     except (OSError, ValueError, KeyError, json.JSONDecodeError) as exc:
         parser.exit(1, f"error: {exc}\n")
-    sys.stdout.write("&#96;&#96;&#96;mermaid\n" .replace("&#96;", "`") + diagram + "```\n" if args.markdown else diagram)
+    sys.stdout.write("```mermaid\n" + diagram + "```\n" if args.markdown else diagram)
 
 
 if __name__ == "__main__":
