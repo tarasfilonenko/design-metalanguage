@@ -77,7 +77,7 @@ async function resolve(entry) {
     return cache.get(id);
   }
   async function expand(instance, stack = []) {
-    if (!instance || instance.kind !== 'component-instance' || !instance.definition)
+    if (!instance || (instance.kind !== undefined && instance.kind !== 'component-instance') || !instance.definition)
       fail('Invalid component instance in ' + (stack.at(-1) || 'main.json'));
     const id = instance.definition;
     if (stack.includes(id)) fail('Recursive definition cycle: ' + [...stack, id].join(' → '));
